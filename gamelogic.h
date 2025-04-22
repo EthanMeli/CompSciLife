@@ -9,8 +9,22 @@ class PowerUp;
 class Tile;
 
 class Player {
-    public:
-        Player(QString name);
+public:
+    Player(QString name);
+
+    void addMoney(int amount);
+    void modifyIncome(float percent);
+    void moveForward(int steps);
+    void moveBackward(int steps);
+    void giveRandomPowerup();
+    void notify(const QString& message);
+
+private:
+    QString name;
+    int position = 0;
+    int money = 0;
+    float incomeMultiplier = 1.0f;
+    std::vector<std::unique_ptr<PowerUp>> powerups;
 };
 
 class PowerUp {
