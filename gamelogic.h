@@ -19,6 +19,19 @@ public:
     void giveRandomPowerup();
     void notify(const QString& message);
 
+    const std::vector<std::unique_ptr<PowerUp>>& getPowerups() const;
+
+    void usePowerup(int index);
+    QString getName() const { return name; }
+    int getMoney() const { return money; }
+    float getIncomePercent() const { return incomeMultiplier * 100.0f; }
+    int getPosition() const { return position; }
+    void setPosition(int pos) { position = pos; }
+
+    bool finished = false;
+    bool isFinished() const { return finished; }
+    void markFinished() { finished = true; }
+
 private:
     QString name;
     int position = 0;
@@ -30,19 +43,26 @@ private:
 class PowerUp {
     public:
         virtual ~PowerUp() {}
+        virtual void apply(Player& player) = 0;
+        virtual QString name() const = 0;
 };
 
-// Example power up subclasses, fully implement later
 class MovePower : public PowerUp {
     public:
+        void apply(Player& player) override;
+        QString name() const override;
 };
 
 class StealPower : public PowerUp {
     public:
+        void apply(Player& player) override;
+        QString name() const override;
 };
 
 class MoneyPower : public PowerUp {
     public:
+        void apply(Player& player) override;
+        QString name() const override;
 };
 
 class Board {

@@ -2,6 +2,11 @@
 #include <cstdlib>
 #include <ctime>
 
+/**
+ * @brief Creates and returns a new tile based on the specified type.
+ * @param type The type of tile to create (enum: TileType).
+ * @return Pointer to a dynamically allocated Tile object of the appropriate subclass.
+ */
 Tile* TileFactory::createTile(TileType type) {
     switch (type) {
         case TileType::EMPTY:     return new EmptyTile();
@@ -14,22 +19,34 @@ Tile* TileFactory::createTile(TileType type) {
     }
 }
 
-// Empty: Do nothing
+/**
+ * @brief Activates the EmptyTile. Does nothing.
+ * @param player Reference to the Player interacting with this tile.
+ */
 void EmptyTile::activate(Player& player) {
     // Contemplate life.
 }
 
-// Money
+/**
+ * @brief Activates the MoneyTile. Adds $100 to the player's balance.
+ * @param player Reference to the Player interacting with this tile.
+ */
 void MoneyTile::activate(Player& player) {
     player.addMoney(100);
 }
 
-// Powerup: Gain a random powerup
+/**
+ * @brief Activates the PowerupTile. Grants the player a random power-up.
+ * @param player Reference to the Player interacting with this tile.
+ */
 void PowerupTile::activate(Player& player) {
     player.giveRandomPowerup();
 }
 
-// Accelerator
+/**
+ * @brief Activates the MoveForwardTile. Moves the player forward 1-5 steps.
+ * @param player Reference to the Player interacting with this tile.
+ */
 void MoveForwardTile::activate(Player& player) {
     int steps = rand() % 5 + 1;
     player.moveForward(steps);
@@ -42,7 +59,10 @@ void MoveForwardTile::activate(Player& player) {
     }
 }
 
-// Setback
+/**
+ * @brief Activates the MoveBackwardTile. Moves the player backward 1-5 steps.
+ * @param player Reference to the Player interacting with this tile.
+ */
 void MoveBackwardTile::activate(Player& player) {
     int steps = rand() % 5 + 1;
     player.moveBackward(steps);
@@ -56,7 +76,10 @@ void MoveBackwardTile::activate(Player& player) {
     }
 }
 
-// Life Event Tile (Roll dice 1-6 for job interview, exam, project)
+/**
+ * @brief Activates the LifeEventTile. Simulates a life event like exams or interviews with random outcomes (Depends on Dice Roll).
+ * @param player Reference to the Player interacting with this tile.
+ */
 void LifeEventTile::activate(Player& player) {
     int roll = rand() % 6 + 1;
 

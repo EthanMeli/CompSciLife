@@ -4,6 +4,7 @@
 #include "tiles.h"
 #include <QMainWindow>
 #include <QVector>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,11 +19,31 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    void updatePlayerUI();
+    void updatePlayerPositions();
     void setupBoard();
+    void animatePlayerMove();
+    void switchToNextActivePlayer();
+
+private slots:
+    void on_p2ViewPower_clicked();
+
+    void on_p1ViewPower_clicked();
+
+    void on_rollDice_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *ui;    
+    Player* player1 = new Player("Player 1");
+    Player* player2 = new Player("Player 2");
+
+    QGraphicsEllipseItem* player1Piece = nullptr;
+    QGraphicsEllipseItem* player2Piece = nullptr;
+
+    Player* currentPlayer;
+    bool isPlayer1Turn = true;
+
+    QVector<QPair<int, int>> playableTileCoords;
 
     // Tile settings
     int tileSize = 50;
@@ -31,5 +52,9 @@ private:
 
     // Board setup
     QVector<QVector<Tile*>> boardGrid;
+
+    QTimer* moveTimer = nullptr;
+    int animationStep = 0;
+    int targetPosition = 0;
 };
 #endif // MAINWINDOW_H
