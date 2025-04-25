@@ -1,4 +1,5 @@
 #include "tiles.h"
+#include "moneypopupdialog.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -33,6 +34,9 @@ void EmptyTile::activate(Player& player) {
  */
 void MoneyTile::activate(Player& player) {
     player.addMoney(100);
+
+    MoneyPopupDialog popup;
+    popup.exec();  // Modal dialog
 }
 
 /**

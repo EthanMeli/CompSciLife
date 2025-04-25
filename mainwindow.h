@@ -20,6 +20,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void updatePlayerUI();
+    void handleTile(Player *p); // Main logic for handling tile specific actions
     void updatePlayerPositions();
     void setupBoard();
     void animatePlayerMove();

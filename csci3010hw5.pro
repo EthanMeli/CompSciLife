@@ -12,15 +12,20 @@ SOURCES += \
     gamelogic.cpp \
     main.cpp \
     mainwindow.cpp \
-    tiles.cpp
+    moneypopupdialog.cpp \
+    tiles.cpp \
+    powerdialog.cpp
 
 HEADERS += \
     gamelogic.h \
     mainwindow.h \
-    tiles.h
+    moneypopupdialog.h \
+    tiles.h \
+    powerdialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    moneypopupdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

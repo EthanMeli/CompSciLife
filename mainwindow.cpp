@@ -51,6 +51,9 @@ void MainWindow::setupBoard() {
     // Assign special tiles at certain locations
     boardGrid[0][2] = new MoveForwardTile();
     boardGrid[0][4] = new PowerupTile();
+    boardGrid[0][3] = new MoneyTile();
+    boardGrid[0][5] = new MoneyTile();
+    boardGrid[0][6] = new MoneyTile();
     boardGrid[0][8] = new MoneyTile();
     boardGrid[1][8] = new MoveBackwardTile();
     boardGrid[2][6] = new LifeEventTile();
@@ -147,6 +150,17 @@ void MainWindow::updatePlayerUI() {
 }
 
 /**
+ * @brief Handles game logic for specific tiles
+ * TODO: CREATE UI DESIGN FOR EACH TILE OPTION
+ */
+void MainWindow::handleTile(Player *p) {
+    auto [r, c] = playableTileCoords[p->getPosition()];
+    Tile* tile = boardGrid[r][c];
+
+    tile->activate(*p);
+}
+
+/**
  * @brief Animates a player’s movement from current position to target position, step by step.
  *        Uses a timer to simulate movement.
  */
@@ -158,6 +172,9 @@ void MainWindow::animatePlayerMove() {
         updatePlayerUI();
         animationStep++;
     } else {
+        // Handle tile specific logic
+        handleTile(currentPlayer);
+
         moveTimer->stop();
 
         // Mark player as finished if at last tile
