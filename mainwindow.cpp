@@ -160,6 +160,10 @@ void MainWindow::updatePlayerUI() {
     ui->p2Pos->setText(QString::number(player2->getPosition()));
 }
 
+/**
+ * @brief Updates the UI panels to indicate whose turn it is.
+ * Highlights the active player and grays out the inactive player.
+ */
 void MainWindow::updatePlayerPanels() {
     if (isPlayer1Turn) {
         ui->p1->setEnabled(true);
@@ -176,6 +180,12 @@ void MainWindow::updatePlayerPanels() {
     }
 }
 
+/**
+ * @brief Starts an immediate player movement animation toward a new board position.
+ * This is used when a tile effect changes the player's current position.
+ *
+ * @param newPosition The new logical position (index in playableTileCoords) to animate towards.
+ */
 void MainWindow::startImmediateMove(int newPosition) {
     animationStep = currentPlayer->getPosition();
     targetPosition = newPosition;
@@ -193,16 +203,15 @@ void MainWindow::startImmediateMove(int newPosition) {
  * TODO: CREATE UI DESIGN FOR EACH TILE OPTION
  */
 void MainWindow::handleTile(Player *p) {
-    int before = p->getPosition(); // Save position BEFORE activation
+    int before = p->getPosition(); // Save position before activation
     auto [r, c] = playableTileCoords[before];
     Tile* tile = boardGrid[r][c];
 
-    tile->activate(*p); // Could move player (forward/backward)
+    tile->activate(*p); // Could move player
 
     int after = p->getPosition(); // After activation
 
     if (after != before) {
-        // 🛠 Player moved due to tile! Animate the new movement
         startImmediateMove(after);
     }
 }
