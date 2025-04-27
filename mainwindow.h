@@ -25,6 +25,8 @@ public:
     void setupBoard();
     void animatePlayerMove();
     void switchToNextActivePlayer();
+    void updatePlayerPanels();
+    void startImmediateMove(int newPosition);
 
 private slots:
     void on_p2ViewPower_clicked();

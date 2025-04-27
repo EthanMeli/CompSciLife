@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     currentPlayer = player1; // Game starts with player 1, duh
 
     setupBoard();
+    updatePlayerPanels();
 }
 
 /**
@@ -51,15 +52,25 @@ void MainWindow::setupBoard() {
     // Assign special tiles at certain locations
     boardGrid[0][2] = new MoveForwardTile();
     boardGrid[0][4] = new PowerupTile();
-    boardGrid[0][3] = new MoneyTile();
-    boardGrid[0][5] = new MoneyTile();
-    boardGrid[0][6] = new MoneyTile();
     boardGrid[0][8] = new MoneyTile();
     boardGrid[1][8] = new MoveBackwardTile();
+    boardGrid[2][0] = new MoneyTile();
     boardGrid[2][6] = new LifeEventTile();
-    boardGrid[2][5] = new MoveForwardTile();
-    boardGrid[2][4] = new MoveBackwardTile();
+    boardGrid[2][3] = new MoveBackwardTile();
     boardGrid[2][1] = new PowerupTile();
+    boardGrid[4][0] = new MoveBackwardTile();
+    boardGrid[4][3] = new MoneyTile();
+    boardGrid[4][4] = new MoveForwardTile();
+    boardGrid[4][8] = new LifeEventTile();
+    boardGrid[6][7] = new PowerupTile();
+    boardGrid[6][5] = new MoneyTile();
+    boardGrid[6][4] = new MoveBackwardTile();
+    boardGrid[6][2] = new MoneyTile();
+    boardGrid[6][1] = new MoveForwardTile();
+    boardGrid[8][0] = new LifeEventTile();
+    boardGrid[8][3] = new MoveBackwardTile();
+    boardGrid[8][5] = new MoneyTile();
+    boardGrid[8][7] = new MoveBackwardTile();
 
     // Tile visuals
     for (int row = 0; row < rows; row++) {
@@ -149,15 +160,51 @@ void MainWindow::updatePlayerUI() {
     ui->p2Pos->setText(QString::number(player2->getPosition()));
 }
 
+void MainWindow::updatePlayerPanels() {
+    if (isPlayer1Turn) {
+        ui->p1->setEnabled(true);
+        ui->p1->setStyleSheet(""); // Reset style (normal)
+
+        ui->p2->setEnabled(false);
+        ui->p2->setStyleSheet("background-color: lightgray;"); // Gray out
+    } else {
+        ui->p1->setEnabled(false);
+        ui->p1->setStyleSheet("background-color: lightgray;"); // Gray out
+
+        ui->p2->setEnabled(true);
+        ui->p2->setStyleSheet(""); // Reset style (normal)
+    }
+}
+
+void MainWindow::startImmediateMove(int newPosition) {
+    animationStep = currentPlayer->getPosition();
+    targetPosition = newPosition;
+    ui->rollDice->setEnabled(false); // Disable again during auto-move
+
+    if (!moveTimer) {
+        moveTimer = new QTimer(this);
+        connect(moveTimer, &QTimer::timeout, this, &MainWindow::animatePlayerMove);
+    }
+    moveTimer->start(150);
+}
+
 /**
  * @brief Handles game logic for specific tiles
  * TODO: CREATE UI DESIGN FOR EACH TILE OPTION
  */
 void MainWindow::handleTile(Player *p) {
-    auto [r, c] = playableTileCoords[p->getPosition()];
+    int before = p->getPosition(); // Save position BEFORE activation
+    auto [r, c] = playableTileCoords[before];
     Tile* tile = boardGrid[r][c];
 
-    tile->activate(*p);
+    tile->activate(*p); // Could move player (forward/backward)
+
+    int after = p->getPosition(); // After activation
+
+    if (after != before) {
+        // 🛠 Player moved due to tile! Animate the new movement
+        startImmediateMove(after);
+    }
 }
 
 /**
@@ -167,26 +214,42 @@ void MainWindow::handleTile(Player *p) {
 // Maybe change it so that animation is more fluid? Idk
 void MainWindow::animatePlayerMove() {
     if (animationStep < targetPosition) {
-        currentPlayer->setPosition(animationStep + 1);
-        updatePlayerPositions();
-        updatePlayerUI();
         animationStep++;
-    } else {
-        // Handle tile specific logic
-        handleTile(currentPlayer);
-
+    }
+    else if (animationStep > targetPosition) {
+        animationStep--;
+    }
+    else {
+        // Animation done
         moveTimer->stop();
 
-        // Mark player as finished if at last tile
+        currentPlayer->setPosition(targetPosition);
+        updatePlayerPositions();
+        updatePlayerUI();
+
+        int prevPos = currentPlayer->getPosition();
+        handleTile(currentPlayer);
+
+        if (currentPlayer->getPosition() != prevPos) {
+            return;
+        }
+
         if (currentPlayer->getPosition() >= playableTileCoords.size() - 1) {
             currentPlayer->markFinished();
         }
 
-        // Switch turn
         switchToNextActivePlayer();
-
-        // Reenable dice roll
         ui->rollDice->setEnabled(true);
+        return;
+    }
+
+    // After adjusting animationStep, move the piece visually
+    auto [r, c] = playableTileCoords[animationStep];
+
+    if (isPlayer1Turn) {
+        player1Piece->setPos(c * tileSize + 5, r * tileSize + 5);
+    } else {
+        player2Piece->setPos(c * tileSize + 20, r * tileSize + 20);
     }
 }
 
@@ -199,6 +262,8 @@ void MainWindow::switchToNextActivePlayer() {
         currentPlayer = isPlayer1Turn ? player1 : player2;
 
         if (!currentPlayer->isFinished()) {
+            animationStep = currentPlayer->getPosition();
+            updatePlayerPanels();
             return;
         }
     }
@@ -268,9 +333,8 @@ void MainWindow::on_rollDice_clicked() {
     int roll = rand() % 6 + 1;
     ui->Dice->setText("DICE: " + QString::number(roll));
 
-    int currPos = currentPlayer->getPosition();
-    targetPosition = std::min(currPos + roll, static_cast<int>(playableTileCoords.size()) - 1);
-    animationStep = currPos;
+    animationStep = currentPlayer->getPosition();
+    targetPosition = std::min(animationStep + roll, static_cast<int>(playableTileCoords.size()) - 1);
     // Disable while moving
     ui->rollDice->setEnabled(false);
 
