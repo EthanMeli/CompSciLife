@@ -48,18 +48,29 @@ void MainWindow::setupBoard() {
             boardGrid[row][col] = new EmptyTile();
         }
     }
+
     // Assign special tiles at certain locations
     boardGrid[0][2] = new MoveForwardTile();
     boardGrid[0][4] = new PowerupTile();
-    boardGrid[0][3] = new MoneyTile();
-    boardGrid[0][5] = new MoneyTile();
-    boardGrid[0][6] = new MoneyTile();
     boardGrid[0][8] = new MoneyTile();
     boardGrid[1][8] = new MoveBackwardTile();
+    boardGrid[2][0] = new MoneyTile();
     boardGrid[2][6] = new LifeEventTile();
-    boardGrid[2][5] = new MoveForwardTile();
-    boardGrid[2][4] = new MoveBackwardTile();
+    boardGrid[2][3] = new MoveBackwardTile();
     boardGrid[2][1] = new PowerupTile();
+    boardGrid[4][0] = new MoveBackwardTile();
+    boardGrid[4][3] = new MoneyTile();
+    boardGrid[4][4] = new MoveForwardTile();
+    boardGrid[4][8] = new LifeEventTile();
+    boardGrid[6][7] = new PowerupTile();
+    boardGrid[6][5] = new MoneyTile();
+    boardGrid[6][4] = new MoveBackwardTile();
+    boardGrid[6][2] = new MoneyTile();
+    boardGrid[6][1] = new MoveForwardTile();
+    boardGrid[8][0] = new LifeEventTile();
+    boardGrid[8][3] = new MoveBackwardTile();
+    boardGrid[8][5] = new MoneyTile();
+    boardGrid[8][7] = new MoveBackwardTile();
 
     // Tile visuals
     for (int row = 0; row < rows; row++) {
