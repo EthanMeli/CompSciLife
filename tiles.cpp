@@ -1,5 +1,6 @@
 #include "tiles.h"
 #include "moneypopupdialog.h"
+#include "lifeeventdialog.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -33,9 +34,12 @@ void EmptyTile::activate(Player& player) {
  * @param player Reference to the Player interacting with this tile.
  */
 void MoneyTile::activate(Player& player) {
-    player.addMoney(100);
+    float moneyAdd = 100 * player.getIncomePercent();
+    QString moneyLabel = "$" + QString::number(moneyAdd);
+    player.addMoney(moneyAdd);
 
     MoneyPopupDialog popup;
+    popup.updateText(moneyLabel);
     popup.exec();  // Modal dialog
 }
 
@@ -85,31 +89,72 @@ void MoveBackwardTile::activate(Player& player) {
  * @param player Reference to the Player interacting with this tile.
  */
 void LifeEventTile::activate(Player& player) {
-    int roll = rand() % 6 + 1;
-
-    if (roll <= 2) {
-        player.notify("You had a job interview!");
-        if (roll == 1) {
-            player.notify("You failed. Nothing happens.");
+    int roll = rand() % 3 + 1;
+    LifeEventDialog popup;
+    if (roll == 1) {
+        QString event = "You will have a job interview!\nRoll the dice to find out your fate!";
+        popup.updateText(event);
+        if (popup.exec() == QDialog::Accepted) {
+            roll = popup.getDiceRoll(); // Updates roll based on dialog button
+            popup.disableDiceRoll();
+        }
+        if (roll <= 2) {
+            event = "You failed :(\nNothing happens. All you've lost is your pride...";
+            popup.updateText(event);
+            popup.exec();
+        } else if (roll <= 4) {
+            event = "Congrats you passed!\nYou're on pace to becoming\n a fine software dev!\n+15% income.";
+            popup.updateText(event);
+            popup.exec();
+            player.modifyIncome(0.15f);
         } else {
-            player.notify("You're the new CEO! +30% income.");
+            event = "You're the new CEO! +30% income.";
+            popup.updateText(event);
+            popup.exec();
             player.modifyIncome(0.30f);
         }
-    } else if (roll <= 4) {
-        player.notify("Final Exam for CSCI 3010...");
-        if (roll == 3) {
-            player.notify("You failed. Move back 2 steps.");
+    } else if (roll == 2) {
+        QString event = "You're taking your final exam for CSCI 3010!\nI hope you studied...\nRoll the dice to find out your fate!";
+        popup.updateText(event);
+        if (popup.exec() == QDialog::Accepted) {
+            roll = popup.getDiceRoll();
+            popup.disableDiceRoll();
+        }
+        if (roll <= 2) {
+            event = "You got a 15% on your final :(\n Not even the curve will save this.\nMove back 2 spaces.";
+            popup.updateText(event);
+            popup.exec();
             player.moveBackward(2);
+        } else if (roll <= 4) {
+            event = "You passed!\nYou know what they say \"C's get degrees!\"\nNothing happens.";
+            popup.updateText(event);
+            popup.exec();
         } else {
-            player.notify("Reported for potential cheating. Move back 1 step.");
-            player.moveBackward(1);
+            event = "You got an A!\nAll of that studying finally paid off!\nMove forward 2 spaces to celebrate!";
+            popup.updateText(event);
+            popup.exec();
+            player.moveForward(2);
         }
     } else {
-        player.notify("Your project is due at 11:59PM!");
-        if (roll == 5) {
-            player.notify("You turned it in at 11:58PM. Nothing happens.");
+        QString event = "Your project is due today at 11:59PM.\nRoll the dice to find out your fate!";
+        popup.updateText(event);
+        if (popup.exec() == QDialog::Accepted) {
+            roll = popup.getDiceRoll();
+            popup.disableDiceRoll();
+        }
+        if (roll <= 2) {
+            event = "You failed to turn in your project on time :(\nYou may want to cut back on gaming this month\nMove back 2 spaces!";
+            popup.updateText(event);
+            popup.exec();
+            player.moveBackward(2);
+        } else if (roll <= 4) {
+            event = "Congrats you turned in your project on time!\nUnfortunately we don't reward mediocracy\nso nothing happens.";
+            popup.updateText(event);
+            popup.exec();
         } else {
-            player.notify("You turned it in 5 months ago. Move forward 2 steps.");
+            event = "Wow you went above and beyond!\nYou turned in your project 5 months early\nand left time for your other assignments!\nMove forward 2 spaces!";
+            popup.updateText(event);
+            popup.exec();
             player.moveForward(2);
         }
     }

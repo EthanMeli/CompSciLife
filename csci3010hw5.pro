@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     gamelogic.cpp \
+    lifeeventdialog.cpp \
     main.cpp \
     mainwindow.cpp \
     moneypopupdialog.cpp \
@@ -18,12 +19,14 @@ SOURCES += \
 
 HEADERS += \
     gamelogic.h \
+    lifeeventdialog.h \
     mainwindow.h \
     moneypopupdialog.h \
     tiles.h \
     powerdialog.h
 
 FORMS += \
+    lifeeventdialog.ui \
     mainwindow.ui \
     moneypopupdialog.ui
 
