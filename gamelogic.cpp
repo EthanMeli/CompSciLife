@@ -1,6 +1,7 @@
 #include "gamelogic.h"
 #include <QDebug>
 #include <random>
+#include <QMessageBox>
 
 // ------------------------- POWER UP METHODS -------------------------
 
@@ -9,10 +10,11 @@
  * @param player The player using the power up.
  * Moves the player forward by 3 spaces and notifies them.
  */
-// TODO: Move a certain amount of tiles forward and receive a 50% paycheck for being the best intern in your company.
 void MovePower::apply(Player& player) {
     player.moveForward(3);
-    player.notify("Used Jon Promotion! Advanced 3 spaces.");
+    player.modifyIncome(0.5f);
+    player.setUsedPowerupThisTurn(true);
+    player.notify("Used Job Promotion! Moved 3 spaces and got a 50% income boost!");
 }
 
 /**
@@ -29,11 +31,19 @@ QString MovePower::name() const {
  * @param player The player using the power up.
  * Adds $50 to the player's money.
  */
-// TODO: Will be revised later so that a percentage of money is taken.
 void StealPower::apply(Player& player) {
-    player.addMoney(50); // Placeholder effect for stealing
-    player.notify("Used Bank Account Hack! Gained $50.");
+    Player* opponent = player.getOpponent();
+    if (opponent) {
+        int amount = opponent->getMoney() * 0.3;
+        opponent->subtractMoney(amount);
+        player.addMoney(amount);
+        player.notify("Used Bank Account Hack! Stole 30% of your opponent's cash: $" + QString::number(amount));
+    } else {
+        player.notify("No opponent to steal from!");
+    }
+    player.setUsedPowerupThisTurn(false); // No movement needed
 }
+
 QString StealPower::name() const {
     return "Bank Account Hack";
 }
@@ -43,11 +53,12 @@ QString StealPower::name() const {
  * @param player The player using the power up.
  * Adds $100 to the player's money.
  */
-// TODO: Change this placeholder power up into the Energy Drink power up that skips opponent's turn
 void MoneyPower::apply(Player& player) {
-    player.addMoney(100);
-    player.notify("Used Energy Drink! Gained $100.");
+    player.addMoney(1000);
+    player.notify("Used Energy Drink! You worked all night and gained $1000.");
+    player.setUsedPowerupThisTurn(false); // No movement needed
 }
+
 QString MoneyPower::name() const {
     return "Energy Drink";
 }
@@ -66,6 +77,14 @@ Player::Player(QString name) : name(name) {}
  */
 void Player::addMoney(int amount) {
     money += amount;
+}
+
+/**
+ * @brief Subtracts money from the player's total.
+ * @param amount The amount to subtract.
+ */
+void Player::subtractMoney(int amount) {
+    money = std::max(0, money - amount);
 }
 
 /**
@@ -128,6 +147,7 @@ const std::vector<std::unique_ptr<PowerUp>>& Player::getPowerups() const {
  */
 void Player::usePowerup(int index) {
     if (index >= 0 && index < static_cast<int>(powerups.size())) {
+        usedPowerupThisTurn = false;
         powerups[index]->apply(*this);
         powerups.erase(powerups.begin() + index);
     }
@@ -138,5 +158,29 @@ void Player::usePowerup(int index) {
  * @param message The message to display.
  */
 void Player::notify(const QString& message) {
-    qDebug() << name << ":" << message;
+    QMessageBox::information(nullptr, name, message);
+}
+
+/**
+ * @brief Sets the opponent player.
+ * @param opp Pointer to the opponent.
+ */
+void Player::setOpponent(Player* opp) {
+    opponent = opp;
+}
+
+/**
+ * @brief Gets the opponent player.
+ * @return Pointer to the opponent player.
+ */
+Player* Player::getOpponent() const {
+    return opponent;
+}
+
+void Player::setUsedPowerupThisTurn(bool moved) {
+    usedPowerupThisTurn = moved;
+}
+
+bool Player::didUsePowerupMove() const {
+    return usedPowerupThisTurn;
 }

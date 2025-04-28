@@ -14,6 +14,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     moneypopupdialog.cpp \
+    textpopupdialog.cpp \
     tiles.cpp \
     powerdialog.cpp
 
@@ -22,13 +23,15 @@ HEADERS += \
     lifeeventdialog.h \
     mainwindow.h \
     moneypopupdialog.h \
+    textpopupdialog.h \
     tiles.h \
     powerdialog.h
 
 FORMS += \
     lifeeventdialog.ui \
     mainwindow.ui \
-    moneypopupdialog.ui
+    moneypopupdialog.ui \
+    textpopupdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

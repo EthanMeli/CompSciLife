@@ -6,12 +6,14 @@
 #include <vector>
 #include "gamelogic.h"
 
+class MainWindow;
+
 class PowerDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit PowerDialog(Player* player, QWidget *parent = nullptr);
+    explicit PowerDialog(Player* player, MainWindow* mainWindow, QWidget *parent = nullptr);
     ~PowerDialog();
 
 private slots:
@@ -19,6 +21,7 @@ private slots:
 
 private:
     Player* playerRef;
+    MainWindow* mainWindowRef;
     std::vector<QPushButton*> useButtons;
 
     void setupUI();

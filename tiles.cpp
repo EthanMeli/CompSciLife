@@ -1,8 +1,10 @@
 #include "tiles.h"
 #include "moneypopupdialog.h"
 #include "lifeeventdialog.h"
+#include "textpopupdialog.h"
 #include <cstdlib>
 #include <ctime>
+#include <QMessageBox>
 
 /**
  * @brief Creates and returns a new tile based on the specified type.
@@ -44,11 +46,16 @@ void MoneyTile::activate(Player& player) {
 }
 
 /**
- * @brief Activates the PowerupTile. Grants the player a random power-up.
+ * @brief Activates the PowerupTile. Grants the player a random power-up and shows a basic text popup.
  * @param player Reference to the Player interacting with this tile.
  */
 void PowerupTile::activate(Player& player) {
     player.giveRandomPowerup();
+
+    QMessageBox* msgBox = new QMessageBox();
+    msgBox->setWindowTitle("Power-up!");
+    msgBox->setText("You received a power up! Click the power up button to view your power ups.");
+    msgBox->show();
 }
 
 /**
@@ -58,13 +65,23 @@ void PowerupTile::activate(Player& player) {
 void MoveForwardTile::activate(Player& player) {
     int steps = rand() % 5 + 1;
     player.moveForward(steps);
+
+    QString baseMessage;
     switch (steps) {
-        case 1: player.notify("Your parents send their support."); break;
-        case 2: player.notify("You fixed all the bugs during an all-nighter!"); break;
-        case 3: player.notify("Stack Exchange came through with perfect docs."); break;
-        case 4: player.notify("You're typing faster than light!"); break;
-        case 5: player.notify("It worked on the first try?!"); break;
+    case 1: baseMessage = "Your parents send their support."; break;
+    case 2: baseMessage = "You fixed all the bugs during an all-nighter!"; break;
+    case 3: baseMessage = "Stack Exchange came through with perfect docs."; break;
+    case 4: baseMessage = "You're typing faster than light!"; break;
+    case 5: baseMessage = "It worked on the first try?!"; break;
     }
+
+    // Build the full message
+    QString fullMessage = "Nice!\n" + baseMessage + "\nYou move forward " + QString::number(steps) + " spaces!";
+
+    // Show popup
+    TextPopupDialog popup;
+    popup.updateText(fullMessage);
+    popup.exec();  // Modal popup
 }
 
 /**
@@ -74,15 +91,28 @@ void MoveForwardTile::activate(Player& player) {
 void MoveBackwardTile::activate(Player& player) {
     int steps = rand() % 5 + 1;
     player.moveBackward(steps);
+
+    QString baseMessage;
     switch (steps) {
-        case 1: player.notify("You did your partner’s part of the group project."); break;
-        case 2: player.notify("You missed the project meeting!"); break;
-        case 3: player.notify("You got sick, and your prof said 'tough luck'."); break;
-        case 4: player.notify("Endless bugs... try reinstalling VSCode?"); break;
-        case 5: player.notify("You deleted System32. RIP. Also lost $50.");
-                player.addMoney(-50); break;
+    case 1: baseMessage = "You did your partner’s part of the group project."; break;
+    case 2: baseMessage = "You missed the project meeting!"; break;
+    case 3: baseMessage = "You got sick, and your prof said 'tough luck'."; break;
+    case 4: baseMessage = "Endless bugs... try reinstalling VSCode?"; break;
+    case 5:
+        baseMessage = "You deleted System32. RIP. Also lost $50.";
+        player.addMoney(-50);
+        break;
     }
+
+    // Build the full message
+    QString fullMessage = "Oh no!\n" + baseMessage + "\nYou move backward " + QString::number(steps) + " spaces!";
+
+    // Show popup
+    TextPopupDialog popup;
+    popup.updateText(fullMessage);
+    popup.exec();
 }
+
 
 /**
  * @brief Activates the LifeEventTile. Simulates a life event like exams or interviews with random outcomes (Depends on Dice Roll).

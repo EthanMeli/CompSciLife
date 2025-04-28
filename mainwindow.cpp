@@ -16,6 +16,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    player1->setOpponent(player2);
+    player2->setOpponent(player1);
+
     currentPlayer = player1; // Game starts with player 1, duh
 
     setupBoard();
@@ -324,13 +328,13 @@ void MainWindow::switchToNextActivePlayer() {
 // Player 1 power up list
 void MainWindow::on_p1ViewPower_clicked()
 {
-    PowerDialog* dialog = new PowerDialog(player1, this);
+    PowerDialog* dialog = new PowerDialog(player1, this, this);
     dialog->exec();
 }
 // Player 2 power up list
 void MainWindow::on_p2ViewPower_clicked()
 {
-    PowerDialog* dialog = new PowerDialog(player2, this);
+    PowerDialog* dialog = new PowerDialog(player2, this, this);
     dialog->exec();
 }
 // Rolls the dice, animates movement, and handles turn switching.

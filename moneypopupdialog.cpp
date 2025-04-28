@@ -13,7 +13,7 @@ MoneyPopupDialog::~MoneyPopupDialog()
     delete ui;
 }
 
-void MoneyPopupDialog::updateText(const QString& newText)
+void MoneyPopupDialog::updateText(const QString &newText)
 {
     ui->moneyLabel->setText(newText);
 }

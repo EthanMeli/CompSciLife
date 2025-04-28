@@ -1,12 +1,13 @@
 #include "powerdialog.h"
+#include "mainwindow.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QFont>
 
 // Constructor: Initializes dialog with a reference to the player and sets up the UI
-PowerDialog::PowerDialog(Player* player, QWidget *parent)
-    : QDialog(parent), playerRef(player)
+PowerDialog::PowerDialog(Player* player, MainWindow* mainWindow, QWidget *parent)
+    : QDialog(parent), playerRef(player), mainWindowRef(mainWindow)
 {
     // Dialog title
     setWindowTitle("Available Power-Ups");
@@ -61,6 +62,12 @@ void PowerDialog::setupUI() {
 void PowerDialog::usePowerup(int index) {
     if (index >= 0 && index < static_cast<int>(playerRef->getPowerups().size())) {
         playerRef->usePowerup(index);
-        accept(); // Close
+
+        if (mainWindowRef) {
+            mainWindowRef->updatePlayerUI();
+            mainWindowRef->updatePlayerPositions();
+        }
+
+        accept(); // Close dialog
     }
 }

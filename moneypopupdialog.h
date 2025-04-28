@@ -14,7 +14,7 @@ class MoneyPopupDialog : public QDialog
 public:
     explicit MoneyPopupDialog(QWidget *parent = nullptr);
 
-    void updateText(const QString& newText);
+    void updateText(const QString &newText);
 
     ~MoneyPopupDialog();
 

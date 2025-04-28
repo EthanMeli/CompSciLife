@@ -7,12 +7,14 @@
 
 class PowerUp;
 class Tile;
+class Player;
 
 class Player {
 public:
     Player(QString name);
 
     void addMoney(int amount);
+    void subtractMoney(int amount);
     void modifyIncome(float percent);
     void moveForward(int steps);
     void moveBackward(int steps);
@@ -28,16 +30,24 @@ public:
     int getPosition() const { return position; }
     void setPosition(int pos) { position = pos; }
 
+    void setOpponent(Player* opponent);
+    Player* getOpponent() const;
+
     bool finished = false;
     bool isFinished() const { return finished; }
     void markFinished() { finished = true; }
+
+    void setUsedPowerupThisTurn(bool moved);
+    bool didUsePowerupMove() const;
 
 private:
     QString name;
     int position = 0;
     int money = 0;
     float incomeMultiplier = 1.0f;
+    bool usedPowerupThisTurn = false;
     std::vector<std::unique_ptr<PowerUp>> powerups;
+    Player* opponent = nullptr;
 };
 
 class PowerUp {
