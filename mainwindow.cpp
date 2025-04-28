@@ -73,14 +73,6 @@ void MainWindow::setupBoard() {
     boardGrid[8][5] = new MoneyTile();
     boardGrid[8][7] = new MoveBackwardTile();
 
-    // TODO: Delete (Life Event Testing)
-    boardGrid[0][3] = new LifeEventTile();
-    boardGrid[0][4] = new LifeEventTile();
-    boardGrid[0][5] = new LifeEventTile();
-    boardGrid[0][6] = new LifeEventTile();
-    boardGrid[0][7] = new LifeEventTile();
-    boardGrid[2][7] = new LifeEventTile();
-
     // Tile visuals
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
