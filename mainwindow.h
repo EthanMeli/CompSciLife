@@ -17,7 +17,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(Player* p1, Player* p2, QWidget *parent = nullptr);
     ~MainWindow();
     void updatePlayerUI();
     void handleTile(Player *p); // Main logic for handling tile specific actions

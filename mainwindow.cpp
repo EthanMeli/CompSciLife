@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "tiles.h"
 #include "powerdialog.h"
+#include "playerinfodialog.h"
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <algorithm>
@@ -11,11 +12,14 @@
  * @brief Constructor for MainWindow. Initializes the UI and game board.
  * @param parent Pointer to parent QWidget.
  */
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(Player* p1, Player* p2, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    player1 = p1;
+    player2 = p2;
 
     player1->setOpponent(player2);
     player2->setOpponent(player1);
@@ -24,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setupBoard();
     updatePlayerPanels();
+    updatePlayerUI();
 }
 
 /**

@@ -14,6 +14,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     moneypopupdialog.cpp \
+    playerinfodialog.cpp \
     textpopupdialog.cpp \
     tiles.cpp \
     powerdialog.cpp
@@ -23,6 +24,7 @@ HEADERS += \
     lifeeventdialog.h \
     mainwindow.h \
     moneypopupdialog.h \
+    playerinfodialog.h \
     textpopupdialog.h \
     tiles.h \
     powerdialog.h
@@ -31,6 +33,7 @@ FORMS += \
     lifeeventdialog.ui \
     mainwindow.ui \
     moneypopupdialog.ui \
+    playerinfodialog.ui \
     textpopupdialog.ui
 
 # Default rules for deployment.
