@@ -1,7 +1,8 @@
 #include "gamelogic.h"
 #include <QDebug>
-#include <random>
+#include <QTimer>
 #include <QMessageBox>
+#include <random>
 
 // ------------------------- POWER UP METHODS -------------------------
 
@@ -34,18 +35,61 @@ QString MovePower::name() const {
 void StealPower::apply(Player& player) {
     Player* opponent = player.getOpponent();
     if (opponent) {
-        int amount = opponent->getMoney() * 0.3;
-        opponent->subtractMoney(amount);
-        player.addMoney(amount);
-        player.notify("Used Bank Account Hack! Stole 30% of your opponent's cash: $" + QString::number(amount));
+        int opponentMoney = opponent->getMoney();
+        if (opponentMoney > 0) {
+            int amount = opponentMoney * 0.3;
+            opponent->addMoney(-amount);
+            player.addMoney(amount);
+            player.notify("Used Bank Account Hack! Stole 30% of your opponent's cash: $" + QString::number(amount));
+        } else {
+            opponent->addMoney(-3000);
+            player.notify("Used Bank Account Hack!\nYour opponent had no money...\nSo you added $3000 to their debt.");
+        }
     } else {
         player.notify("No opponent to steal from!");
     }
+
     player.setUsedPowerupThisTurn(false); // No movement needed
 }
 
 QString StealPower::name() const {
     return "Bank Account Hack";
+}
+
+/**
+ * @brief Applies the Time Freeze power up.
+ * @param player The player using the power up.
+ * Skips the opponent's next turn.
+ */
+void SkipPower::apply(Player& player) {
+    Player* opponent = player.getOpponent();
+    if (opponent) {
+        opponent->setSkipNextTurn(true);
+        player.notify("Used Time Freeze! Your opponent's next turn will be skipped.");
+    } else {
+        player.notify("No opponent to skip!");
+    }
+
+    player.setUsedPowerupThisTurn(false); // No movement
+}
+
+QString SkipPower::name() const {
+    return "Time Freeze";
+}
+
+/**
+ * @brief Applies the Speed Boost power up.
+ * @param player The player using the power up.
+ * Moves the player forward by 6 spaces.
+ */
+void SuperMovePower::apply(Player& player) {
+    player.moveForward(6);
+    player.notify("Used Speed Boost! Zoomed forward 6 spaces!");
+    player.setUsedPowerupThisTurn(true);
+}
+
+QString SuperMovePower::name() const {
+    return "Speed Boost";
 }
 
 /**
@@ -63,6 +107,14 @@ QString MoneyPower::name() const {
     return "Energy Drink";
 }
 
+/**
+ * @brief Adds a power-up to the player's inventory.
+ * @param p Pointer to the PowerUp to add. Ownership is transferred to the player.
+ */
+void Player::addPower(PowerUp* p) {
+    powerups.emplace_back(p);
+}
+
 // ------------------------- PLAYER METHODS -------------------------
 
 /**
@@ -70,6 +122,38 @@ QString MoneyPower::name() const {
  * @param name The name of the player.
  */
 Player::Player(QString name) : name(name) {}
+
+/**
+ * @brief Gets the player's name.
+ * @return Player's name.
+ */
+QString Player::getName() const {
+    return name;
+}
+
+/**
+ * @brief Sets the player's board position.
+ * @param pos The new board index.
+ */
+void Player::setPosition(int pos) {
+    position = pos;
+}
+
+/**
+ * @brief Checks if the player is finished.
+ * @return True if finished, false otherwise.
+ */
+bool Player::isFinished() {
+    return finished;
+}
+
+/**
+ * @brief Gets the player's current income percentage.
+ * @return Income percent as a float (e.g., 115.0 for 1.15x).
+ */
+float Player::getIncomePercent() const {
+    return incomeMultiplier * 100.0f;
+}
 
 /**
  * @brief Adds money to the player's total.
@@ -80,11 +164,19 @@ void Player::addMoney(int amount) {
 }
 
 /**
- * @brief Subtracts money from the player's total.
- * @param amount The amount to subtract.
+ * @brief Gets the player's current money.
+ * @return The player's money amount.
  */
-void Player::subtractMoney(int amount) {
-    money = std::max(0, money - amount);
+int Player::getMoney() const {
+    return money;
+}
+
+/**
+ * @brief Provides mutable access to the player's power-up list.
+ * @return Reference to the vector of unique_ptrs holding the player's power-ups.
+ */
+std::vector<std::unique_ptr<PowerUp>>& Player::accessPowerups() {
+    return powerups;
 }
 
 /**
@@ -93,6 +185,44 @@ void Player::subtractMoney(int amount) {
  */
 void Player::modifyIncome(float percent) {
     incomeMultiplier += percent;
+}
+
+/**
+ * @brief Sets whether the player's next turn should be skipped.
+ * @param skip True to skip the next turn, false otherwise.
+ */
+void Player::setSkipNextTurn(bool skip) {
+    skipTurn = skip;
+}
+
+/**
+ * @brief Marks the player as having finished the game.
+ */
+void Player::markFinished() {
+    finished = true;
+}
+
+/**
+ * @brief Returns whether the player's turn should be skipped.
+ * @return True if the next turn should be skipped.
+ */
+bool Player::shouldSkipTurn() const {
+    return skipTurn;
+}
+
+/**
+ * @brief Clears the skip turn flag for the player.
+ */
+void Player::clearSkipTurn() {
+    skipTurn = false;
+}
+
+/**
+ * @brief Gets the player's current position on the board.
+ * @return The current tile index.
+ */
+int Player::getPosition() const {
+    return position;
 }
 
 /**
@@ -116,21 +246,29 @@ void Player::moveBackward(int steps) {
  * No parameters or return value.
  */
 void Player::giveRandomPowerup() {
-    int r = rand() % 3;
+    int r = rand() % 5; // Now 5 possible powerups
+    std::unique_ptr<PowerUp> newPower;
+
     switch (r) {
     case 0:
-        powerups.push_back(std::make_unique<MovePower>());
-        notify("Gained Power-Up: Move Power!");
+        newPower = std::make_unique<MovePower>();
         break;
     case 1:
-        powerups.push_back(std::make_unique<StealPower>());
-        notify("Gained Power-Up: Steal Power!");
+        newPower = std::make_unique<StealPower>();
         break;
     case 2:
-        powerups.push_back(std::make_unique<MoneyPower>());
-        notify("Gained Power-Up: Money Power!");
+        newPower = std::make_unique<MoneyPower>();
+        break;
+    case 3:
+        newPower = std::make_unique<SkipPower>();
+        break;
+    case 4:
+        newPower = std::make_unique<SuperMovePower>();
         break;
     }
+
+    notify("Gained Power-Up: " + newPower->name() + "!");
+    powerups.push_back(std::move(newPower));
 }
 
 /**
@@ -154,11 +292,18 @@ void Player::usePowerup(int index) {
 }
 
 /**
- * @brief Prints a message to the debug console.
- * @param message The message to display.
+ * @brief Displays a message popup. Auto-closes if the player is AI.
+ * @param message The message to show.
  */
 void Player::notify(const QString& message) {
-    QMessageBox::information(nullptr, name, message);
+    QMessageBox* box = new QMessageBox(QMessageBox::Information, name, message, QMessageBox::Ok);
+    box->setAttribute(Qt::WA_DeleteOnClose); // Clean
+    box->show();
+
+    if (name == "CPU") {
+        // Auto close after 1.5 seconds for AI players
+        QTimer::singleShot(1500, box, &QMessageBox::accept);
+    }
 }
 
 /**
@@ -177,10 +322,18 @@ Player* Player::getOpponent() const {
     return opponent;
 }
 
+/**
+ * @brief Sets whether the player has used a power up that involved movement this turn.
+ * @param moved True if the player moved due to a power up, false otherwise.
+ */
 void Player::setUsedPowerupThisTurn(bool moved) {
     usedPowerupThisTurn = moved;
 }
 
+/**
+ * @brief Checks if the player used a power-up to move this turn.
+ * @return True if a movement power-up was used, false otherwise.
+ */
 bool Player::didUsePowerupMove() const {
     return usedPowerupThisTurn;
 }
